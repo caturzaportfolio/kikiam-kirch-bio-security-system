@@ -7,16 +7,17 @@ name = "kikiam-bio-security"
 version = "0.1.0"
 description = "Local biometric security research and benchmarking laboratory."
 readme = "README.md"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.12,<3.13"
 dependencies = [
-    "opencv-python>=4.10,<5",
+    "numpy==2.5.3",
+    "opencv-python==4.14.0.94",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "mypy>=1.14,<2",
-    "pytest>=8,<10",
-    "ruff>=0.9,<1",
+    "mypy==1.20.2",
+    "pytest==9.1.1",
+    "ruff==0.16.7",
 ]
 
 [project.scripts]
@@ -38,7 +39,7 @@ src = ["src", "tests"]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 mypy_path = "src"
 packages = ["bio_security"]
