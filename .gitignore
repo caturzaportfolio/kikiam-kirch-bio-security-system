@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local configuration / secrets
+.env
+.env.*
+!.env.example
+
+# Biometric and benchmark material: never commit local subject data or captures.
+data/
+captures/
+results/
+models/
+*.npy
+*.npz
+*.onnx
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
