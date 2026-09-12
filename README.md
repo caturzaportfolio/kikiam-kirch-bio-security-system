@@ -6,6 +6,63 @@ A local computer-vision system for experimenting with camera-based face detectio
 
 **Project status:** 🧪 Research / Benchmark — not production access control
 
+## Windows Local Test Deployment — BIO-001
+
+BIO-001 is deployable on a Windows laptop for local camera and face-detection testing. This deployment proves only:
+
+```text
+Camera -> Frame Capture -> Face Detection -> Local Visualization -> Timing Metrics
+```
+
+It does **not** perform identity recognition, enrollment, authentication, liveness/PAD, cloud processing, or physical access control.
+
+### Requirements
+
+- Windows 10 or Windows 11
+- Git
+- Python 3.12
+- A working webcam or built-in laptop camera
+
+### PowerShell deployment
+
+Open PowerShell and run:
+
+```powershell
+git clone https://github.com/caturzaportfolio/kikiam-kirch-bio-security-system.git
+cd kikiam-kirch-bio-security-system
+git checkout KIKIAM-BIO-001-CAMERA-BASELINE
+
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+
+.\.venv\Scripts\bio-security.exe detect --camera 0
+```
+
+The direct `.venv\Scripts\...` commands intentionally do not require PowerShell virtual-environment activation, so they also work on machines where script activation is restricted.
+
+To request a specific capture size:
+
+```powershell
+.\.venv\Scripts\bio-security.exe detect --camera 0 --width 1280 --height 720
+```
+
+Press `Q` or `ESC` to stop the camera session. `Ctrl+C` also performs cleanup. Frames are not saved by default.
+
+### Optional verification before camera testing
+
+```powershell
+.\.venv\Scripts\ruff.exe check src tests
+.\.venv\Scripts\mypy.exe src
+.\.venv\Scripts\pytest.exe
+```
+
+The repository CI already runs these checks. Hardware acceptance still requires execution on the actual Windows test laptop so the camera, real resolution, FPS, and observed detection/total latency can be recorded.
+
+### Expected behavior
+
+When the test starts, the application should open the selected camera, display the local video stream, draw face-detection boxes when faces are detected, and show timing information. If the camera cannot be opened, a frame cannot be read, or the detector cannot initialize, the program exits with an explicit error instead of silently continuing.
+
 ---
 
 ## 1. Purpose
