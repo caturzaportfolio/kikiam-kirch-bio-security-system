@@ -21,9 +21,13 @@ from bio_security.dnn_face import (
     YuNetFaceDetector,
 )
 from bio_security.domain import BoundingBox
-from bio_security.gui import EnrollmentState, KikiamDesktopApp
-from bio_security.identity import FeatureVector, RecognitionResult
-from bio_security.infrastructure.opencv_runtime import CameraOpenError, CameraReadError, OpenCVCamera
+from bio_security.gui import KikiamDesktopApp
+from bio_security.identity import FeatureVector
+from bio_security.infrastructure.opencv_runtime import (
+    CameraOpenError,
+    CameraReadError,
+    OpenCVCamera,
+)
 from bio_security.infrastructure.sqlite_identity import (
     DuplicatePersonError,
     SQLiteIdentityRepository,
