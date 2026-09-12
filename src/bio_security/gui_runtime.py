@@ -23,6 +23,13 @@ from bio_security.infrastructure.sqlite_identity import (
 from bio_security.ports import Frame
 
 
+class MirroredOpenCVCamera(OpenCVCamera):
+    """Mirror GUI frames horizontally for natural webcam interaction."""
+
+    def read(self) -> Frame:
+        return cv2.flip(super().read(), 1)
+
+
 class PillowKikiamDesktopApp(KikiamDesktopApp):
     """BIO-002 GUI with a Pillow-backed camera preview.
 
@@ -58,7 +65,7 @@ def run_gui(
 ) -> int:
     """Launch BIO-002 with the Pillow-backed Tk camera preview."""
 
-    camera = OpenCVCamera(index=camera_index)
+    camera = MirroredOpenCVCamera(index=camera_index)
     detector = OpenCVHaarFaceDetector()
     repository = SQLiteIdentityRepository(registry_path or default_registry_path())
     root: tk.Tk | None = None
