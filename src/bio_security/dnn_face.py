@@ -154,7 +154,11 @@ class TemporalMatchStabilizer:
         if count < self._required_matches:
             return RecognitionResult(status="UNKNOWN", person=None, similarity=result.similarity)
 
-        same_person = [item for item in matched if item.person is not None and item.person.person_id == person_id]
+        same_person = [
+            item
+            for item in matched
+            if item.person is not None and item.person.person_id == person_id
+        ]
         person = same_person[-1].person
         similarity = sum(item.similarity for item in same_person) / len(same_person)
         return RecognitionResult(status="MATCH", person=person, similarity=similarity)
