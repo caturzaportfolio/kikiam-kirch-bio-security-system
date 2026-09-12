@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 from collections.abc import Sequence
+from contextlib import suppress
 
 from bio_security.application import DetectionSession
 from bio_security.infrastructure.opencv_runtime import (
@@ -73,11 +74,9 @@ def _run_detection(args: argparse.Namespace) -> int:
         return 2
     finally:
         camera.close()
-        try:
+        # Window creation may never have succeeded (for example on a headless machine).
+        with suppress(Exception):
             window.close()
-        except Exception:
-            # Window creation may never have succeeded (for example on a headless machine).
-            pass
 
     summary = session.metrics.summary() if session is not None else None
     if summary is not None:
