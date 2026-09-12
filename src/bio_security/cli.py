@@ -36,26 +36,26 @@ def build_parser() -> argparse.ArgumentParser:
 
     gui = subparsers.add_parser(
         "gui",
-        help="launch BIO-002 local enrollment and recognition GUI",
+        help="launch BIO-003 YuNet + SFace enrollment and recognition GUI",
     )
     gui.add_argument("--camera", type=int, default=0, help="zero-based camera index")
     gui.add_argument(
         "--registry",
         type=Path,
         default=None,
-        help="optional SQLite registry path (defaults to per-user local app data)",
+        help="optional SQLite registry path (defaults to BIO-003 per-user local app data)",
     )
     gui.add_argument(
         "--threshold",
         type=float,
-        default=0.86,
-        help="research matching threshold in (0, 1]",
+        default=0.45,
+        help="SFace cosine threshold in (0, 1]; default is a conservative 0.45",
     )
     gui.add_argument(
         "--samples",
         type=int,
         default=8,
-        help="number of enrollment samples per person (minimum 3)",
+        help="number of SFace enrollment samples per person (minimum 3)",
     )
     return parser
 
