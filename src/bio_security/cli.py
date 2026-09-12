@@ -6,6 +6,7 @@ import argparse
 import sys
 from collections.abc import Sequence
 from contextlib import suppress
+from pathlib import Path
 
 from bio_security.application import DetectionSession
 from bio_security.infrastructure.opencv_runtime import (
@@ -32,6 +33,30 @@ def build_parser() -> argparse.ArgumentParser:
     detect.add_argument("--scale-factor", type=float, default=1.1)
     detect.add_argument("--min-neighbors", type=int, default=5)
     detect.add_argument("--min-face-size", type=int, default=40)
+
+    gui = subparsers.add_parser(
+        "gui",
+        help="launch BIO-002 local enrollment and recognition GUI",
+    )
+    gui.add_argument("--camera", type=int, default=0, help="zero-based camera index")
+    gui.add_argument(
+        "--registry",
+        type=Path,
+        default=None,
+        help="optional SQLite registry path (defaults to per-user local app data)",
+    )
+    gui.add_argument(
+        "--threshold",
+        type=float,
+        default=0.86,
+        help="research matching threshold in (0, 1]",
+    )
+    gui.add_argument(
+        "--samples",
+        type=int,
+        default=8,
+        help="number of enrollment samples per person (minimum 3)",
+    )
     return parser
 
 
@@ -39,7 +64,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "detect":
         return _run_detection(args)
+    if args.command == "gui":
+        return _run_gui(args)
     return 2
+
+
+def _run_gui(args: argparse.Namespace) -> int:
+    from bio_security.gui import run_gui
+
+    return run_gui(
+        camera_index=args.camera,
+        registry_path=args.registry,
+        threshold=args.threshold,
+        enrollment_samples=args.samples,
+    )
 
 
 def _run_detection(args: argparse.Namespace) -> int:
@@ -74,7 +112,6 @@ def _run_detection(args: argparse.Namespace) -> int:
         return 2
     finally:
         camera.close()
-        # Window creation may never have succeeded (for example on a headless machine).
         with suppress(Exception):
             window.close()
 
