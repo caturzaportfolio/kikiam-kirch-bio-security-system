@@ -500,7 +500,7 @@ class KikiamDesktopApp:
             f"P6\n{image_width} {image_height}\n255\n".encode("ascii")
             + rgb.tobytes()
         )
-        encoded = base64.b64encode(ppm)
+        encoded = base64.b64encode(ppm).decode("ascii")
         self._photo = tk.PhotoImage(data=encoded, format="PPM")
         self.camera_label.configure(image=self._photo, text="")
 
