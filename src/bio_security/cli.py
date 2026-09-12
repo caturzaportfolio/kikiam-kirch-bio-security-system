@@ -70,7 +70,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _run_gui(args: argparse.Namespace) -> int:
-    from bio_security.gui import run_gui
+    from bio_security.gui_runtime import run_gui
 
     return run_gui(
         camera_index=args.camera,
