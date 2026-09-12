@@ -87,7 +87,10 @@ class OpenCVHaarFaceDetector:
         if min_face_size <= 0:
             raise ValueError("min_face_size must be positive")
 
-        path = cascade_path or Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"
+        default_cascade = (
+            Path(cv2.__file__).resolve().parent / "data" / "haarcascade_frontalface_default.xml"
+        )
+        path = cascade_path or default_cascade
         classifier = cv2.CascadeClassifier(str(path))
         if classifier.empty():
             raise DetectorLoadError(f"unable to load Haar cascade: {path}")
