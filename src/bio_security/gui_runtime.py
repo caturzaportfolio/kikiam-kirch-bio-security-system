@@ -212,7 +212,7 @@ class PillowKikiamDesktopApp(KikiamDesktopApp):
         if norm <= 0.0:
             raise ValueError("enrollment centroid has zero norm")
         centroid /= norm
-        return cast(FeatureVector, centroid)
+        return centroid
 
     def _display_frame(self, frame: Frame) -> None:
         height, width = frame.shape[:2]
