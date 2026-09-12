@@ -19,17 +19,45 @@ It does **not** perform identity recognition, enrollment, authentication, livene
 ### Requirements
 
 - Windows 10 or Windows 11
-- Git
+- Git for Windows
 - Python 3.12
 - A working webcam or built-in laptop camera
 
-### PowerShell deployment
+Do **not** deploy from `C:\Windows\System32`. Use a normal user-owned working directory such as `%USERPROFILE%\Projects`.
 
-Open PowerShell and run:
+### Install and verify Git first
+
+Check whether Git is already available:
 
 ```powershell
+git --version
+```
+
+If PowerShell reports that `git` is not recognized, install Git with Windows Package Manager:
+
+```powershell
+winget install --id Git.Git -e --source winget
+```
+
+After installation, either reopen PowerShell or refresh the current process PATH:
+
+```powershell
+$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+git --version
+```
+
+Do not continue until `git --version` succeeds.
+
+### PowerShell deployment
+
+Create a normal working directory, then clone and run the BIO-001 branch:
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\Projects" | Out-Null
+Set-Location "$HOME\Projects"
+
 git clone https://github.com/caturzaportfolio/kikiam-kirch-bio-security-system.git
-cd kikiam-kirch-bio-security-system
+Set-Location .\kikiam-kirch-bio-security-system
 git checkout KIKIAM-BIO-001-CAMERA-BASELINE
 
 py -3.12 -m venv .venv
@@ -48,6 +76,16 @@ To request a specific capture size:
 ```
 
 Press `Q` or `ESC` to stop the camera session. `Ctrl+C` also performs cleanup. Frames are not saved by default.
+
+### Cleanup after an accidental System32 attempt
+
+If an earlier failed deployment created `C:\Windows\System32\.venv`, remove only that accidental virtual environment before retrying:
+
+```powershell
+if (Test-Path "C:\Windows\System32\.venv") {
+    Remove-Item -Recurse -Force "C:\Windows\System32\.venv"
+}
+```
 
 ### Optional verification before camera testing
 
@@ -186,27 +224,25 @@ The domain and decision logic should remain testable without a physical camera o
 
 | Area | Technology / Direction |
 |---|---|
-| Language | **Python 3.11/3.12** — exact version selected after hardware compatibility check |
+| Language | **Python 3.12** — verified BIO-001 runtime |
 | Environment | Python `venv` |
 | Project configuration | `pyproject.toml` |
 | Camera / computer vision | **OpenCV** |
 | Numerical computing | **NumPy** |
-| Inference boundary | **ONNX Runtime** |
-| Face model | Model-agnostic; InsightFace is a benchmark candidate pending license/model review |
+| Inference boundary | **ONNX Runtime** — future recognition work |
+| Face model | Model-agnostic; recognition model not yet selected |
 | Benchmark analysis | Pandas where justified |
-| Visualization | Matplotlib |
+| Visualization | Local OpenCV display for BIO-001; Matplotlib where justified later |
 | Configuration / validation | Pydantic where justified |
 | Testing | pytest |
 | Lint / formatting | Ruff |
-| Type checking | mypy or another justified checker |
+| Type checking | mypy |
 | Logging | Python `logging` with structured event fields |
 | Local metadata | SQLite when structured persistence becomes necessary |
 | API | FastAPI — future, not required for the first slice |
 | Web UI | React + TypeScript — future presentation layer only |
 
 Dependencies must be selected based on hardware compatibility, maintenance, performance, security, and licensing rather than popularity alone.
-
-ONNX Runtime is used as an inference boundary so the model implementation can change without coupling the decision system to one framework.
 
 ---
 
@@ -419,42 +455,30 @@ Dedicated liveness / presentation-attack detection may be researched later if be
 
 ---
 
-## 14. Planned Repository Structure
-
-The exact implementation structure will be finalized after local repository inspection. The target direction is:
+## 14. Current Repository Structure
 
 ```text
 kikiam-kirch-bio-security-system/
-├── src/
-│   └── bio_security/
-│       ├── camera/
-│       ├── detection/
-│       ├── embedding/
-│       ├── matching/
-│       ├── enrollment/
-│       ├── decision/
-│       ├── storage/
-│       ├── audit/
-│       └── benchmark/
+├── .github/workflows/ci.yml
+├── docs/BIO-001.md
+├── src/bio_security/
+│   ├── infrastructure/
+│   │   └── opencv_runtime.py
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── application.py
+│   ├── cli.py
+│   ├── domain.py
+│   └── ports.py
 ├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── benchmark/
-├── scripts/
-├── configs/
-├── docs/
-├── data/
-│   ├── enrollment/
-│   ├── genuine/
-│   ├── impostor/
-│   └── spoof/
-├── results/
+│   ├── test_detection_session.py
+│   └── test_metrics.py
 ├── pyproject.toml
 ├── README.md
 └── .gitignore
 ```
 
-This structure is a target, not permission to create unnecessary abstractions. Existing meaningful repository structure must be preserved when implementation begins.
+The current structure is intentionally narrow. Embedding, matching, enrollment, storage, audit, API, and web layers are not created until their behavior is earned by later milestones.
 
 ---
 
@@ -530,25 +554,11 @@ Do not move toward physical access control until benchmark evidence, security li
 
 ### Unit tests
 
-Fast, deterministic tests for:
-
-- similarity calculations;
-- threshold behavior;
-- FAR/FRR calculations;
-- decision policy;
-- quality gates;
-- multiple-face policy;
-- error mapping;
-- metric aggregation.
+BIO-001 currently contains deterministic tests for its pure detection-session and timing behavior. Later milestones add tests for matching, threshold policy, FAR/FRR, enrollment, and other recognition behavior when those features actually exist.
 
 ### Integration tests
 
-Test the actual boundaries between:
-
-- camera adapter;
-- model adapter;
-- template storage;
-- recognition pipeline.
+Test the actual boundaries between camera adapters, detector/model adapters, storage, and later recognition pipeline components as they are introduced.
 
 Where possible, use prerecorded controlled test images instead of requiring a physical camera for every test.
 
@@ -699,13 +709,13 @@ The benchmark assumes a trusted local development laptop. It is not designed to 
 
 ## 20. Current Status
 
-**Stage:** DISCOVER / DEFINE
+**Stage:** IMPLEMENT / VERIFY
 
-**Current milestone:** Camera → Face Detection → Visualization → Timing Metrics
+**Current milestone:** BIO-001 — Camera → Face Detection → Visualization → Timing Metrics
 
-**Deployment:** Local laptop only
+**Deployment:** Windows/local laptop test deployment available on `KIKIAM-BIO-001-CAMERA-BASELINE`
 
-**Recognition model:** Not finalized
+**Recognition model:** Not implemented in BIO-001
 
 **Web UI:** Not required yet
 
@@ -715,14 +725,15 @@ The benchmark assumes a trusted local development laptop. It is not designed to 
 
 ## 21. First Milestone Acceptance Criteria
 
-- [ ] Camera initializes and operates reliably.
+- [ ] Camera initializes and operates reliably on the target Windows laptop.
 - [ ] Face detection works on the target laptop.
-- [ ] Detection latency is measured.
-- [ ] Output is locally observable.
-- [ ] Camera failure is handled explicitly.
-- [ ] Testable architecture boundaries are established.
-- [ ] No biometric data is committed to Git.
-- [ ] README and benchmark protocol remain synchronized with implementation.
+- [ ] Detection and total latency are observed on real hardware.
+- [x] Output is locally observable by implementation design.
+- [x] Camera/frame/detector failures are handled explicitly.
+- [x] Testable architecture boundaries are established.
+- [x] Biometric/capture/result/model artifacts are excluded from Git by repository policy.
+- [x] Repository CI passes Ruff, mypy, and pytest.
+- [ ] Real hardware evidence is recorded and README/benchmark protocol are synchronized with the result.
 
 ---
 
@@ -736,18 +747,4 @@ Before distributing, commercializing, or deploying the system, review the licens
 
 ## 23. Next Engineering Action
 
-Before implementing the recognition system:
-
-1. Inspect the local repository.
-2. Inspect the target laptop hardware.
-3. Confirm Python compatibility.
-4. Confirm camera availability.
-5. Evaluate candidate detection/inference libraries and model licenses.
-6. Create the first architecture decision records.
-7. Implement only the first vertical slice:
-
-```text
-Camera → Face Detection → Visualization → Timing Metrics
-```
-
-The system should earn each subsequent architectural layer through benchmark evidence rather than speculative complexity.
+Run BIO-001 on the target Windows laptop and record the actual camera, resolution, FPS, detection latency, and total latency. Use that evidence to accept or reject the camera baseline before starting enrollment or recognition work.
