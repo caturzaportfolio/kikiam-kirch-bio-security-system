@@ -155,11 +155,17 @@ class KikiamDesktopApp:
                 padx=(0, 12),
                 pady=5,
             )
-            ttk.Label(
-                tab,
-                textvariable=self.result_vars[key],
-                font=("Segoe UI", 10, "bold") if key == "status" else None,
-            ).grid(row=index, column=1, sticky=tk.W, pady=5)
+            if key == "status":
+                ttk.Label(
+                    tab,
+                    textvariable=self.result_vars[key],
+                    font=("Segoe UI", 10, "bold"),
+                ).grid(row=index, column=1, sticky=tk.W, pady=5)
+            else:
+                ttk.Label(
+                    tab,
+                    textvariable=self.result_vars[key],
+                ).grid(row=index, column=1, sticky=tk.W, pady=5)
 
         ttk.Separator(tab).grid(row=7, column=0, columnspan=2, sticky=tk.EW, pady=14)
 
@@ -310,7 +316,6 @@ class KikiamDesktopApp:
         self.enrollment_progress["value"] = 0
         self.enrollment_progress_var.set(f"0 / {self.enrollment_samples} samples")
         self.status_var.set("Enrollment started. Keep exactly one face in view.")
-        self.notebook.select(1)
 
     def _cancel_enrollment(self) -> None:
         self.enrollment = None
@@ -491,7 +496,10 @@ class KikiamDesktopApp:
 
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image_height, image_width = rgb.shape[:2]
-        ppm = f"P6\n{image_width} {image_height}\n255\n".encode("ascii") + rgb.tobytes()
+        ppm = (
+            f"P6\n{image_width} {image_height}\n255\n".encode("ascii")
+            + rgb.tobytes()
+        )
         encoded = base64.b64encode(ppm)
         self._photo = tk.PhotoImage(data=encoded, format="PPM")
         self.camera_label.configure(image=self._photo, text="")
