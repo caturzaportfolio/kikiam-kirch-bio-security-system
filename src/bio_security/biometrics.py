@@ -93,7 +93,7 @@ class LBPFeatureExtractor:
                     histogram /= total
                 histograms.append(histogram)
         combined = np.concatenate(histograms).astype(np.float32, copy=False)
-        return cast(FeatureVector, combined)
+        return combined
 
 
 def cosine_similarity(left: FeatureVector, right: FeatureVector) -> float:
