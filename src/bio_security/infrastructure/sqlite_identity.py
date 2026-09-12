@@ -108,7 +108,10 @@ class SQLiteIdentityRepository:
                         created_at,
                     ),
                 )
-                person_id = int(cursor.lastrowid)
+                lastrowid = cursor.lastrowid
+                if lastrowid is None:
+                    raise RuntimeError("SQLite did not return a person identifier")
+                person_id = lastrowid
                 connection.executemany(
                     """
                     INSERT INTO biometric_templates (
